@@ -11,7 +11,7 @@ import {
 } from "@workspace/api-client-react";
 import { RankedSite } from "@workspace/api-client-react/src/generated/api.schemas";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, Swords, AlertCircle, RefreshCw } from "lucide-react";
+import { Trophy, Swords, AlertCircle, RefreshCw, SkipForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function MatchupHero() {
@@ -22,6 +22,11 @@ export default function MatchupHero() {
   const [animatingWinner, setAnimatingWinner] = useState<number | null>(null);
   const [animatingLoser, setAnimatingLoser] = useState<number | null>(null);
   const [scoreDelta, setScoreDelta] = useState<number>(0);
+
+  const handleSkip = () => {
+    if (castVote.isPending || animatingWinner !== null) return;
+    queryClient.invalidateQueries({ queryKey: getGetMatchupQueryKey() });
+  };
 
   const handleVote = (winnerId: number, loserId: number) => {
     if (castVote.isPending) return;
@@ -118,6 +123,18 @@ export default function MatchupHero() {
           />
         </motion.div>
       </AnimatePresence>
+
+      <div className="flex justify-center mt-6">
+        <Button
+          variant="ghost"
+          onClick={handleSkip}
+          disabled={castVote.isPending || animatingWinner !== null}
+          className="text-muted-foreground hover:text-foreground gap-2"
+        >
+          <SkipForward size={16} />
+          Skip this matchup
+        </Button>
+      </div>
     </div>
   );
 }
