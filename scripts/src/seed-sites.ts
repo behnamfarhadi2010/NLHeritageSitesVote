@@ -13,9 +13,11 @@ async function main() {
   const data = sites as SiteSeed[];
   const existing = await db.select().from(sitesTable);
 
-  if (existing.length === data.length) {
+  const force = process.argv.includes("--force");
+
+  if (!force && existing.length === data.length) {
     console.log(
-      `Sites table already has ${existing.length} rows matching seed — nothing to do.`,
+      `Sites table already has ${existing.length} rows matching seed — pass --force to refresh.`,
     );
     return;
   }
