@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "NL Historic Rank"
+version = "1.0.0"
+id = "artifacts/nl-historic-rank"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22742
+
+[services.development]
+run = "pnpm --filter @workspace/nl-historic-rank run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/nl-historic-rank", "run", "build" ]
+publicDir = "artifacts/nl-historic-rank/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22742"
+BASE_PATH = "/"

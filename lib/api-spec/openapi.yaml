@@ -3,13 +3,21 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: API for ranking historic sites in Newfoundland and Labrador via head-to-head voting and ELO scoring.
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: sites
+    description: Historic site rankings
+  - name: matchup
+    description: Head-to-head matchup voting
+  - name: votes
+    description: Vote history
+  - name: stats
+    description: Aggregate statistics
 paths:
   /healthz:
     get:
@@ -24,6 +32,102 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /sites:
+    get:
+      operationId: listSites
+      tags: [sites]
+      summary: List all historic sites with current ranks
+      description: Returns every site ordered by ELO score (highest first), including current rank, score, and recent rank change.
+      responses:
+        "200":
+          description: Sites with rankings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RankedSite"
+  /matchup:
+    get:
+      operationId: getMatchup
+      tags: [matchup]
+      summary: Get a fresh head-to-head matchup
+      description: Returns two sites picked for the next vote, plus their current ranks.
+      responses:
+        "200":
+          description: A matchup of two sites
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Matchup"
+  /votes:
+    post:
+      operationId: castVote
+      tags: [votes]
+      summary: Cast a vote for one site over another
+      description: Records the user's pick and updates ELO scores for both sites.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoteSubmission"
+      responses:
+        "201":
+          description: Vote recorded with ELO updates
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoteResult"
+        "400":
+          description: Invalid vote
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Site not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /votes/recent:
+    get:
+      operationId: listRecentVotes
+      tags: [votes]
+      summary: List recent votes
+      description: Returns the most recent votes with site names and ELO deltas.
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+      responses:
+        "200":
+          description: Recent votes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RecentVote"
+  /stats:
+    get:
+      operationId: getStats
+      tags: [stats]
+      summary: Aggregate stats
+      description: Returns total vote count, total sites, top-ranked site, and biggest mover.
+      responses:
+        "200":
+          description: Aggregate stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stats"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +137,172 @@ components:
           type: string
       required:
         - status
-
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+    Site:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        designated:
+          type: integer
+          description: Year designated as a National Historic Site
+        location:
+          type: string
+        summary:
+          type: string
+        imageUrl:
+          type: ["string", "null"]
+      required:
+        - id
+        - name
+        - designated
+        - location
+        - summary
+        - imageUrl
+    RankedSite:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        designated:
+          type: integer
+        location:
+          type: string
+        summary:
+          type: string
+        imageUrl:
+          type: ["string", "null"]
+        score:
+          type: integer
+          description: Current ELO score
+        rank:
+          type: integer
+          description: Current rank, 1-indexed
+        change:
+          type: integer
+          description: Rank change since the site's last appearance in a vote (positive = moved up)
+        matchesPlayed:
+          type: integer
+        wins:
+          type: integer
+      required:
+        - id
+        - name
+        - designated
+        - location
+        - summary
+        - imageUrl
+        - score
+        - rank
+        - change
+        - matchesPlayed
+        - wins
+    Matchup:
+      type: object
+      properties:
+        siteA:
+          $ref: "#/components/schemas/RankedSite"
+        siteB:
+          $ref: "#/components/schemas/RankedSite"
+      required:
+        - siteA
+        - siteB
+    VoteSubmission:
+      type: object
+      properties:
+        winnerId:
+          type: integer
+        loserId:
+          type: integer
+      required:
+        - winnerId
+        - loserId
+    VoteResult:
+      type: object
+      properties:
+        voteId:
+          type: integer
+        winnerId:
+          type: integer
+        loserId:
+          type: integer
+        winnerScoreBefore:
+          type: integer
+        winnerScoreAfter:
+          type: integer
+        loserScoreBefore:
+          type: integer
+        loserScoreAfter:
+          type: integer
+        eloDelta:
+          type: integer
+          description: Points transferred from loser to winner
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - voteId
+        - winnerId
+        - loserId
+        - winnerScoreBefore
+        - winnerScoreAfter
+        - loserScoreBefore
+        - loserScoreAfter
+        - eloDelta
+        - createdAt
+    RecentVote:
+      type: object
+      properties:
+        id:
+          type: integer
+        winnerId:
+          type: integer
+        winnerName:
+          type: string
+        loserId:
+          type: integer
+        loserName:
+          type: string
+        eloDelta:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - winnerId
+        - winnerName
+        - loserId
+        - loserName
+        - eloDelta
+        - createdAt
+    Stats:
+      type: object
+      properties:
+        totalVotes:
+          type: integer
+        totalSites:
+          type: integer
+        topSite:
+          anyOf:
+            - $ref: "#/components/schemas/RankedSite"
+            - type: "null"
+        biggestMover:
+          anyOf:
+            - $ref: "#/components/schemas/RankedSite"
+            - type: "null"
+      required:
+        - totalVotes
+        - totalSites
+        - topSite
+        - biggestMover
