@@ -1,4 +1,3 @@
-# NLHeritageSitesVote
 
 # NL Heritage Sites Vote 🏛️
 
@@ -6,7 +5,7 @@ A web application that allows users to explore and vote for Newfoundland and Lab
 
 ## 🌐 Live Demo
 
-[Coming Soon]
+https://newfoundland-sites--digitalmarke303.replit.app/
 
 ## 📸 Screenshots
 
