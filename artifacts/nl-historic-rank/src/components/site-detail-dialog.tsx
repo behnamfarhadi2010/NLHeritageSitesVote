@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Trophy, MapPin, Swords, TrendingUp, TrendingDown, Minus, Calendar } from "lucide-react";
 import type { RankedSite } from "@workspace/api-client-react";
+import { SiteImage } from "./site-image";
 
 export default function SiteDetailDialog({
   site,
@@ -22,17 +23,13 @@ export default function SiteDetailDialog({
         {site && (
           <>
             <div className="relative h-64 w-full bg-muted">
-              {site.imageUrl ? (
-                <img
-                  src={site.imageUrl}
-                  alt={site.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-6xl text-muted-foreground font-serif italic opacity-30">
-                  {site.name[0]}
-                </div>
-              )}
+              <SiteImage
+                src={site.imageUrl}
+                alt={site.name}
+                fallbackInitial={site.name[0]}
+                className="w-full h-full object-cover"
+                fallbackClassName="w-full h-full flex items-center justify-center text-6xl text-muted-foreground font-serif italic opacity-30"
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               <div className="absolute top-4 right-4 flex gap-2">
                 <Badge variant="secondary" className="gap-1.5 px-3 py-1">

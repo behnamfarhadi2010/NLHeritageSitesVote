@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { TrendingUp, TrendingDown, Minus, MapPin, Trophy, Search } from "lucide-react";
 import SiteDetailDialog from "./site-detail-dialog";
+import { SiteImage } from "./site-image";
 
 export default function RankingsList() {
   const { data: sites, isLoading } = useListSites();
@@ -102,17 +103,13 @@ export default function RankingsList() {
                 </div>
 
                 <div className="w-12 h-12 rounded-full overflow-hidden bg-muted flex-shrink-0 border border-border/50">
-                  {site.imageUrl ? (
-                    <img
-                      src={site.imageUrl}
-                      alt={site.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center font-serif text-muted-foreground">
-                      {site.name[0]}
-                    </div>
-                  )}
+                  <SiteImage
+                    src={site.imageUrl}
+                    alt={site.name}
+                    fallbackInitial={site.name[0]}
+                    className="w-full h-full object-cover"
+                    fallbackClassName="w-full h-full flex items-center justify-center font-serif text-muted-foreground"
+                  />
                 </div>
 
                 <div className="flex-grow min-w-0">

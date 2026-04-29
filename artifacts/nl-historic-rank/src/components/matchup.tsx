@@ -13,6 +13,7 @@ import type { RankedSite } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy, Swords, AlertCircle, RefreshCw, SkipForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SiteImage } from "./site-image";
 
 export default function MatchupHero() {
   const queryClient = useQueryClient();
@@ -208,17 +209,13 @@ function SiteCard({
       style={{ minHeight: "450px" }}
     >
       <div className="h-64 w-full relative bg-muted overflow-hidden flex-shrink-0">
-        {site.imageUrl ? (
-          <img 
-            src={site.imageUrl} 
-            alt={site.name} 
-            className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-secondary/10 text-secondary">
-            <span className="font-serif italic text-2xl opacity-50">{site.name[0]}</span>
-          </div>
-        )}
+        <SiteImage
+          src={site.imageUrl}
+          alt={site.name}
+          fallbackInitial={site.name[0]}
+          className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+          fallbackClassName="w-full h-full flex items-center justify-center bg-secondary/10 text-secondary"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
         
         {/* Badge: Designation Year */}
