@@ -36,6 +36,13 @@ ELO is computed with K=32 (`artifacts/api-server/src/lib/elo.ts`). After each vo
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - `pnpm --filter @workspace/api-server run dev` — run API server locally
-- `pnpm --filter @workspace/scripts run seed-sites` — seed the historic sites table (idempotent: skips if rows exist)
+- `pnpm --filter @workspace/scripts run seed-sites` — seed the historic sites table (idempotent: skips if rows exist; pass `-- --force` to replace)
+
+## UI features (nl-historic-rank)
+
+- Voting matchup cards with vote/skip flow.
+- Keyboard shortcuts: `A`/`←` left, `B`/`→` right, `S`/`Space` skip — disabled while typing in inputs.
+- Rankings list: search by name/location, podium highlight (top 3), and click any row to open a site detail dialog (image, summary, ELO, matches, win rate, trend).
+- All site images proxied via `images.weserv.nl` (strip `https?://` from source; do NOT URL-encode the path).
 
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.

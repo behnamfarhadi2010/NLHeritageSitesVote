@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -9,7 +9,7 @@ import {
   getListRecentVotesQueryKey, 
   getGetStatsQueryKey 
 } from "@workspace/api-client-react";
-import { RankedSite } from "@workspace/api-client-react/src/generated/api.schemas";
+import type { RankedSite } from "@workspace/api-client-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy, Swords, AlertCircle, RefreshCw, SkipForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,27 @@ export default function MatchupHero() {
     if (castVote.isPending || animatingWinner !== null) return;
     queryClient.invalidateQueries({ queryKey: getGetMatchupQueryKey() });
   };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      if (!matchup || castVote.isPending || animatingWinner !== null) return;
+      if (e.key === "ArrowLeft" || e.key === "1" || e.key.toLowerCase() === "a") {
+        e.preventDefault();
+        handleVote(matchup.siteA.id, matchup.siteB.id);
+      } else if (e.key === "ArrowRight" || e.key === "2" || e.key.toLowerCase() === "b") {
+        e.preventDefault();
+        handleVote(matchup.siteB.id, matchup.siteA.id);
+      } else if (e.key.toLowerCase() === "s" || e.key === " ") {
+        e.preventDefault();
+        handleSkip();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchup, castVote.isPending, animatingWinner]);
 
   const handleVote = (winnerId: number, loserId: number) => {
     if (castVote.isPending) return;
@@ -124,7 +145,7 @@ export default function MatchupHero() {
         </motion.div>
       </AnimatePresence>
 
-      <div className="flex justify-center mt-6">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
         <Button
           variant="ghost"
           onClick={handleSkip}
@@ -134,6 +155,22 @@ export default function MatchupHero() {
           <SkipForward size={16} />
           Skip this matchup
         </Button>
+
+        <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground">
+          <span>Keyboard:</span>
+          <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted font-mono text-[10px]">A</kbd>
+          <span>or</span>
+          <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted font-mono text-[10px]">←</kbd>
+          <span>left</span>
+          <span className="opacity-50">·</span>
+          <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted font-mono text-[10px]">B</kbd>
+          <span>or</span>
+          <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted font-mono text-[10px]">→</kbd>
+          <span>right</span>
+          <span className="opacity-50">·</span>
+          <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted font-mono text-[10px]">S</kbd>
+          <span>skip</span>
+        </div>
       </div>
     </div>
   );
